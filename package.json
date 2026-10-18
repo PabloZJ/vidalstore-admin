@@ -12,8 +12,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "lint": "oxlint src/",
-    "test": "vitest run"
+    "lint": "oxlint src/ test/",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
@@ -33,6 +33,9 @@
     "@types/amqplib": "^0.10.5",
     "@types/pg": "^8.11.10",
     "typescript": "^6.0.2",
+    "oxlint": "^1.58.0",
+    "prettier": "^3.4.2",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.2"
   }
 }
