@@ -41,7 +41,7 @@ export class AdminService {
     const mensaje = result.rows[0];
     if (!mensaje) throw new NotFoundException(`Mensaje muerto ${id} no encontrado`);
 
-    const exchange = mensaje.cola_origen === 'vidalstore.correos.dlq'
+    const exchange = ['vidalstore.correos', 'vidalstore.correos.dlq'].includes(mensaje.cola_origen)
       ? 'vidalstore.comandos'
       : 'vidalstore.eventos';
     const eventoId = randomUUID();
