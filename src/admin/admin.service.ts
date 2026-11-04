@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service.js';
 import { RabbitAdminService } from './rabbit-admin.service.js';
@@ -43,8 +44,13 @@ export class AdminService {
     const exchange = mensaje.cola_origen === 'vidalstore.correos.dlq'
       ? 'vidalstore.comandos'
       : 'vidalstore.eventos';
-    await this.rabbitAdmin.republicar(exchange, mensaje.routing_key, mensaje.payload);
+    const eventoId = randomUUID();
+    await this.rabbitAdmin.republicar(exchange, mensaje.routing_key, mensaje.payload, {
+      'x-evento-id': eventoId,
+      'x-emitido-en': new Date().toISOString(),
+      'x-reprocesado-de': mensaje.id,
+    });
     await this.database.query('DELETE FROM mensajes_muertos WHERE id = $1', [id]);
-    return { success: true, id, exchange, routingKey: mensaje.routing_key };
+    return { success: true, id, eventoId, exchange, routingKey: mensaje.routing_key };
   }
 }

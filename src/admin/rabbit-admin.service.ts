@@ -112,7 +112,7 @@ export class RabbitAdminService implements OnModuleDestroy {
     });
   }
 
-  async republicar(exchange: string, routingKey: string, payload: string): Promise<void> {
+  async republicar(exchange: string, routingKey: string, payload: string, headers: Record<string, string>): Promise<void> {
     const conexion = await this.conectar();
     let canal: ConfirmChannel | null = null;
     try {
@@ -121,6 +121,7 @@ export class RabbitAdminService implements OnModuleDestroy {
       const publicado = canalConfirmaciones.publish(exchange, routingKey, Buffer.from(payload), {
         persistent: true,
         contentType: 'application/json',
+        headers,
       });
       if (!publicado) throw new ServiceUnavailableException('RabbitMQ no acepto el mensaje para reproceso');
       await canalConfirmaciones.waitForConfirms();
