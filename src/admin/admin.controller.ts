@@ -84,4 +84,9 @@ export class AdminController {
   mensajesMuertos() {
     return this.adminService.deadLetters();
   }
+
+  @Post('mensajes-muertos/:id/reprocesar')
+  reprocesarMensajeMuerto(@Param('id') id: string) {
+    return this.adminService.reprocesarMensajeMuerto(id);
+  }
 }

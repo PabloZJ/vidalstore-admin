@@ -6,7 +6,7 @@ import {
   OnModuleDestroy,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import amqp, { type ChannelModel, type Channel } from 'amqplib';
+import amqp, { type ChannelModel, type Channel, type ConfirmChannel } from 'amqplib';
 import type { CrearColaDto } from './dto/crear-cola.dto.js';
 import type { CrearExchangeDto } from './dto/crear-exchange.dto.js';
 import type { BindingDto } from './dto/binding.dto.js';
@@ -110,6 +110,26 @@ export class RabbitAdminService implements OnModuleDestroy {
       this.log.warn(`binding eliminado: ${dto.exchange} -/-> ${dto.cola}`);
       return dto;
     });
+  }
+
+  async republicar(exchange: string, routingKey: string, payload: string): Promise<void> {
+    const conexion = await this.conectar();
+    let canal: ConfirmChannel | null = null;
+    try {
+      canal = await conexion.createConfirmChannel();
+      const canalConfirmaciones = canal;
+      const publicado = canalConfirmaciones.publish(exchange, routingKey, Buffer.from(payload), {
+        persistent: true,
+        contentType: 'application/json',
+      });
+      if (!publicado) throw new ServiceUnavailableException('RabbitMQ no acepto el mensaje para reproceso');
+      await canalConfirmaciones.waitForConfirms();
+      this.log.log(`mensaje reprocesado: ${exchange} --${routingKey}-->`);
+    } catch (error) {
+      throw this.traducir(error);
+    } finally {
+      await canal?.close().catch(() => undefined);
+    }
   }
 
   // --- Plomeria interna ------------------------------------------------------
