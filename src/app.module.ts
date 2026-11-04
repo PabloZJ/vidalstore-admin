@@ -1,13 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin/admin.controller.js';
 import { AdminService } from './admin/admin.service.js';
+import { RabbitAdminService } from './admin/rabbit-admin.service.js';
 import { DatabaseService } from './database/database.service.js';
 import { HealthController } from './health/health.controller.js';
 import { HealthService } from './health/health.service.js';
-import { RabbitMqManagementService } from './rabbitmq/rabbitmq-management.service.js';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from './auth/guards/roles.guard.js';
+import { JwtVerifyService } from './auth/services/jwt-verify.service.js';
 
 @Module({
   controllers: [AdminController, HealthController],
-  providers: [AdminService, DatabaseService, HealthService, RabbitMqManagementService],
+  providers: [
+    AdminService,
+    RabbitAdminService,
+    DatabaseService,
+    HealthService,
+    JwtAuthGuard,
+    RolesGuard,
+    JwtVerifyService,
+  ],
 })
 export class AppModule {}
