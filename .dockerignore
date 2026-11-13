@@ -2,11 +2,14 @@ node_modules
 dist
 build
 .git
-.gitignore
 .env
 .env.*
 coverage
 .vscode
 .idea
+.graphify
+.qoder
+.opencode
+progress
 *.log
 *.tsbuildinfo
