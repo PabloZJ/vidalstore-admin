@@ -1,20 +1,32 @@
-name: Imagen backend
+name: imagen
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
   packages: write
 jobs:
-  imagen:
+  pruebas:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: docker/setup-qemu-action@v3
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm test --if-present
+      - run: npm run build --if-present
+  imagen:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Nombre de la imagen en minúsculas
+        run: echo "IMAGEN=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
       - uses: docker/setup-buildx-action@v3
-      - name: Nombre de imagen
-        id: imagen
-        run: printf 'name=ghcr.io/%s\n' "${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -23,6 +35,8 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64
           push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.imagen.outputs.name }}:${{ github.sha }}
+          tags: |
+            ${{ env.IMAGEN }}:${{ github.sha }}
+            ${{ env.IMAGEN }}:latest

@@ -8,8 +8,10 @@ import { HealthService } from './health/health.service.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
 import { JwtVerifyService } from './auth/services/jwt-verify.service.js';
+import { KafkaModule } from './kafka/kafka.module.js';
 
 @Module({
+  imports: [KafkaModule],
   controllers: [AdminController, HealthController],
   providers: [
     AdminService,
